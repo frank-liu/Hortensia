@@ -1,0 +1,40 @@
+How to run:
+
+$ cd /home/swan/Downloads/wifi
+$ make
+$ sudo ./wifi eth1
+
+
+/-----------------------------------------------------------------------------------------------------------------------------------/
+from: http://blog.chinaunix.net/uid-24382173-id-213031.html
+
+参考iwlist源码完成
+
+一、目前存在的问题：
+１、iwlist执行时不需要root权限，但我写的wifi工具需要root权限。
+２、有些wifi扫描返回的参数我不理解参数含义，所以只是答应出来，没有做human-readable处理。
+３、扫描参数无法从程序外部控制，目前的操描选项为：IW_SCAN_ALL_ESSID | IW_SCAN_ALL_FREQ | IW_SCAN_ALL_MODE | IW_SCAN_ALL_RATE
+
+二、开发测试环境：
+[uname -a]
+Linux niu 2.6.32-21-generic #32-Ubuntu SMP Fri Apr 16 08:10:02 UTC 2010 i686 GNU/Linux
+[gcc -v]
+Using built-in specs.
+Target: i486-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Ubuntu 4.4.3-4ubuntu5' --with-bugurl=file:///usr/share/doc/gcc-4.4/README.Bugs --enable-languages=c,c++,fortran,objc,obj-c++ --prefix=/usr --enable-shared --enable-multiarch --enable-linker-build-id --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.4 --program-suffix=-4.4 --enable-nls --enable-clocale=gnu --enable-libstdcxx-debug --enable-plugin --enable-objc-gc --enable-targets=all --disable-werror --with-arch-32=i486 --with-tune=generic --enable-checking=release --build=i486-linux-gnu --host=i486-linux-gnu --target=i486-linux-gnu
+Thread model: posix
+gcc version 4.4.3 (Ubuntu 4.4.3-4ubuntu5)
+[/lib/libc.so.6]
+GNU C Library (Ubuntu EGLIBC 2.11.1-0ubuntu7.1) stable release version 2.11.1, by Roland McGrath et al.
+Copyright (C) 2009 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+Compiled by GNU CC version 4.4.3.
+Compiled on a Linux >>2.6.24-27-server<< system on 2010-05-21.
+Available extensions:
+crypt add-on version 2.1 by Michael Glad and others
+GNU Libidn by Simon Josefsson
+Native POSIX Threads Library by Ulrich Drepper et al
+BIND-8.2.3-T5B
+For bug reporting instructions, please see:
