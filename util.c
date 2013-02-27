@@ -22,6 +22,30 @@ inline void usage(char *name)
 	printf("\te.g.: sudo ./%s wlan0\n", name);
 	printf("\tFrank LIU, <frank dot kingdom at gmail dot com>\n");
 }
+
+/*
+ * clear array channel_info[] to zero.
+ */
+void init_channelinfo(struct channel_info ch_info[])
+{
+	int i, j;
+	for (i = 0; i <= MAX_CH; i++)
+	{
+		j = MAX_CH - i;
+		ch_info[i].used = 0;
+		ch_info[i].snr = 0;
+		if (j <= i)
+		{
+			break;
+		}
+		else
+		{
+			ch_info[j].used = 0;
+			ch_info[j].snr = 0;
+		}
+	}
+}
+
 /*
  * modify file contents using a shell script.
  * -index is channel index between [1,13].
@@ -38,6 +62,7 @@ void modify_hostapd_conf(int index)
 	//printf("%s\n",cmd_sh);
 
 	//fp = popen("sh ~/workspace/wifi/myconfig_channel 5", "w");
+
 	fp = popen(cmd_sh, "w"); //call a shell script:myconfig_channel
 	fgets(buffer, sizeof(buffer), fp);
 	pclose(fp);
@@ -152,23 +177,24 @@ int seek_Channel(int channel[])
  */
 int set_channel(int sockfd, int ch_index, const char * iface)
 {
-	struct iwreq wreq;
-	memset(&wreq, 0, sizeof(struct iwreq));
-	sprintf(wreq.ifr_name, iface); //?
+	/*struct iwreq wreq;
+	 memset(&wreq, 0, sizeof(struct iwreq));
+	 sprintf(wreq.ifr_name, iface); //?
 
-	/*Assign a specific channel*/
-	wreq.u.freq.flags = IW_FREQ_FIXED; /* Force a specific value */
-	wreq.u.freq.e = 0;
-	wreq.u.freq.m = ch_index;
+	 Assign a specific channel
+	 wreq.u.freq.flags = IW_FREQ_FIXED;  Force a specific value
+	 wreq.u.freq.e = 0;
+	 wreq.u.freq.m = ch_index;
 
-	/*Set Frequency info from ioctl*/
-	if (ioctl(sockfd, SIOCSIWFREQ, &wreq) == -1)
-	{
-		perror("IOCTL SIOCSIWFREQ Failed,error");
-		exit(2);
-	}
+	 Set Frequency info from ioctl
+	 if (ioctl(sockfd, SIOCSIWFREQ, &wreq) == -1)
+	 {
+	 perror("IOCTL SIOCSIWFREQ Failed,error");
+	 exit(2);
+	 }
 
-	printf("\nChannel is set to: %d\n", wreq.u.freq.m);
+	 printf("\nChannel is set to: %d\n", wreq.u.freq.m);
+	 return 0;*/
 	return 0;
 }
 

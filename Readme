@@ -17,4 +17,3 @@ So far, an executable binary would be generated in /home/swan/workspace/, also n
  
 4.Run
 	> sudo /home/swan/workspace/wifi/switCH eth1
-	eth1 is used to scan an avaliable channel.

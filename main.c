@@ -130,8 +130,24 @@ void wifi_show(struct iw_event *iwe, int channel[])
 		break;
 	case IWEVQUAL:
 	{
-		printf("Quality: %d  Level:%d  Noise: %d\n", iwe->u.qual.qual,
+		/*s for signal in db; n for noise in db; SNR for signal-noise ratio.*/
+		int s, n, snr;
+
+		/*convert signal level in db*/
+		s = (iwe->u.qual.level > 63) ?
+				iwe->u.qual.level - 0x100 : iwe->u.qual.level;
+		/*convert noise in db*/
+		n = (iwe->u.qual.noise > 63) ?
+				iwe->u.qual.noise - 0x100 : iwe->u.qual.noise;
+		snr = s - n; //signal noise ratio
+
+#ifdef MYDEBUG
+		printf("\nQuality: %d  Level:%d  Noise: %d\n", iwe->u.qual.qual,
 				iwe->u.qual.level, iwe->u.qual.noise);
+		printf("\nQuality: %d  Level:%d  Noise: %d  SNR: %u\n",
+				iwe->u.qual.qual, s, n, (unsigned int) snr);
+#endif
+
 	}
 		break;
 	case IWEVCUSTOM:
@@ -147,8 +163,13 @@ void wifi_show(struct iw_event *iwe, int channel[])
 		break;
 	case IWEVGENIE:
 	{
-		printf("IWEVGENIE, get encryption method, we don't care about it.\n");
+		//printf("IWEVGENIE, get encryption method, we don't care about it.\n");
 		//iw_print_gen_ie(iwe->u.data.pointer, iwe->u.data.length);
+	}
+		break;
+	case SIOCGIWSTATS:
+	{
+		;
 	}
 		break;
 	default:
@@ -229,6 +250,9 @@ int main(int argc, char **argv)
 	int channel[14] =
 	{ 0 }; //1 for occupied, 0 for free.
 
+	struct channel_info ch_info[14];
+	init_channelinfo(ch_info);
+
 	/* check param */
 	if (argc < 2)
 	{
@@ -283,10 +307,15 @@ int main(int argc, char **argv)
 	c = seek_Channel(channel); // return a channel index.
 	//set_channel(sock,c,wlan);
 
+	if (c == 0)
+	{
+		//search channel by rssi
+		//seek_Channel_rssi();
+	}
 	/*set hostapd config file*/
 	if (c != 0)
 	{
-		printf("change channel to %d\n",c);
+		printf("\n Change channel to %d\n", c);
 		modify_hostapd_conf(c);
 	}
 

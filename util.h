@@ -4,7 +4,7 @@
 #define MYDEBUG 1 // for outputing debug info.
 #define MAX_CH  13
 
-/*----------------My Data structure---------------------*/
+/*----------------Frank Data structure---------------------*/
 struct ap_class
 {
 	int cnt;			//how many APs in this AP cata
@@ -19,8 +19,8 @@ struct ap_info
 };
 struct channel_info
 {
-	struct ap_info ap;	//gathering an AP's infomation on a channel
-	int free_flag;		//free flag for a channel
+	int used;	//free flag for a channel
+	int snr;	//snr value in a channel
 };
 
 /*----------------Functions--------------------------*/
@@ -37,6 +37,7 @@ void encoding_key(char *buffer, int buflen, const unsigned char *key, int key_si
 inline void iw_print_gen_ie(unsigned char *buffer, int buflen);
 
 /*My function frank*/
+void init_channelinfo(struct channel_info ch_info[]);
 int seek_Channel(int channel[]);
 int set_channel(int sockfd, int ch_index, const char * iface);
 void modify_hostapd_conf(int index);

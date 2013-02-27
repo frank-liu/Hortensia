@@ -2,7 +2,7 @@
 #echo "first:$1"
 #sed -ri 's/(channel=).*/\1'$1'/' /home/swan/myconfig
 # write $1 into config file
-sed -ri 's/(channel=).*/\1'$1'/' /etc/hostapd/hostapd.wlan3.conf
+sed -ri 's/(channel=).*/\1'$1'/' /etc/hostapd/hostapd.wlan1.conf
 /etc/init.d/hostapd restart
 
 /etc/init.d/networking restart
