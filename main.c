@@ -284,7 +284,7 @@ int main(int argc, char **argv)
 #ifdef MYDEBUG
 			printf("\n[%d]\n", ++i);
 #endif
-			/* show wifi result */
+			/* argument should be struct array: ch_info*/
 			wifi_show(&iwe, channel);
 
 			/*判断在这里写*/
