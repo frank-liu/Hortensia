@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <linux/wireless.h>
+//#include <unistd.h> // for get current working directory
 
 #include "util.h"
 
@@ -50,18 +51,26 @@ void init_channelinfo(struct channel_info ch_info[])
  * modify file contents using a shell script.
  * -index is channel index between [1,13].
  */
-void modify_hostapd_conf(int index)
+void modify_hostapd_conf(int index,const char * path)
 {
 	FILE * fp;
 	char buffer[80];
-	char cmd_sh[80] = "sh ~/workspace/wifi/myconfig_channel\t", ch[3];
+	char cmd_sh[100]="sh\t", conf_name[19]="myconfig_channel\t",ch[3];
 
-	//printf("change channel to %d\n",index);
+	char resolved_path[100];
+	sprintf(resolved_path, "%s", path);
+	resolved_path[strlen(resolved_path) - 6] = '\0';//delete last 6 words(i.e., switCH) in path
+	//printf("\nresolved_path=%s,len=%d\n", resolved_path,strlen(resolved_path));
+
+	strcat(cmd_sh,resolved_path);//combine path in shell cmd.
+	//printf("%s\n",cmd_sh);//combine path in shell cmd.
+
+	strcat(cmd_sh,conf_name);//combine configure file name into shell cmd.
+	//printf("2)%s\n",cmd_sh);//combine configure file name into shell cmd.
+
 	sprintf(ch, "%d", index); //convert int to char.
-	strcat(cmd_sh, ch); //connect two strings, and stores the result in first arg.
-	//printf("%s\n",cmd_sh);
-
-	//fp = popen("sh ~/workspace/wifi/myconfig_channel 5", "w");
+	strcat(cmd_sh, ch); //combine channel index into shell cmd..
+	//printf("3)%s\n",cmd_sh);
 
 	fp = popen(cmd_sh, "w"); //call a shell script:myconfig_channel
 	fgets(buffer, sizeof(buffer), fp);
@@ -172,6 +181,37 @@ int seek_Channel(struct channel_info channel[])
 	return index; // find a free channel
 }
 
+/*
+ * concise way to search a channel
+ */
+int seek_Channel2(struct channel_info channel[])
+{
+	int i, j, index = 0, step = 5; //default not found.
+	do
+	{
+		for (i = 1; i <= MAX_CH; i++)
+		{
+			if (channel[i].used == 0 && all_free_ch(i, step, channel) == i)
+			{
+				printf("find a free channel:  %d, step =%d\n", i, step);
+				index = i;
+				break;
+			}
+			j = MAX_CH - i;
+			if (j > i && channel[j].used == 0
+					&& all_free_ch(j, step, channel) == j)
+			{
+				printf("find a free channel:  %d, step =%d\n", j, step);
+				index = j;
+				break;
+			}
+		}
+
+		if (index > 0 && index <= MAX_CH)
+			break; //found a free channel so jump out.
+	} while (--step);
+	return index; // if index==0, not find a free channel
+}
 /*
  * My function : Set Channel
  */

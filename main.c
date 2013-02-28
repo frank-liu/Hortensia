@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <linux/wireless.h>
-
+#include <unistd.h> // for get current work directory
 #include "util.h"
 #include "event.h"
 
@@ -26,6 +26,7 @@
 
 void wifi_show(struct iw_event *iwe, struct channel_info channel[])
 {
+	uint f, channel_index;
 	char tmp[TMP_LENGTH];
 	memset(tmp, 0, TMP_LENGTH);
 
@@ -43,16 +44,17 @@ void wifi_show(struct iw_event *iwe, struct channel_info channel[])
 	case SIOCGIWFREQ:
 	{
 		double freq = freq2double(&iwe->u.freq);
-		uint f, channel_index;
+		//uint f, channel_index;
 		f = (uint) freq / 1e6; // frequency in Mhz
 		channel_index = (f - 2407) / 5; //calculate channel index
 
 #ifdef MYDEBUG
 		printf(" %d %d  ", f, channel_index);
 #endif
-		if (freq <= 1000) /* It's Channel */
+		if (freq <= 1000) /* It's Channel index*/
 		{
 			printf("Channel: %d\n", (int) freq);
+
 		}
 		else /* It's freq */
 		{
@@ -65,7 +67,7 @@ void wifi_show(struct iw_event *iwe, struct channel_info channel[])
 #ifdef MYDEBUG
 		printf("Channel     :0\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\n");
 		printf("Channel[14]= ");
-		for (f = 0; f <= 13; f++)
+		for (f = 0; f <= MAX_CH; f++)
 		{
 			printf("%d\t", channel[f].used);
 		}
@@ -140,6 +142,7 @@ void wifi_show(struct iw_event *iwe, struct channel_info channel[])
 		n = (iwe->u.qual.noise > 63) ?
 				iwe->u.qual.noise - 0x100 : iwe->u.qual.noise;
 		snr = s - n; //signal noise ratio
+		channel[channel_index].snr = snr;
 
 #ifdef MYDEBUG
 		printf("\nQuality: %d  Level:%d  Noise: %d\n", iwe->u.qual.qual,
@@ -241,13 +244,13 @@ int wifi_read(int fd, const char *wlan, struct iwreq *req)
 int main(int argc, char **argv)
 {
 	int sock = 0, c;
-	const char *wlan = NULL;
+	const char *wlan = NULL, *path = NULL;
 	struct iwreq req;
 	struct event_iter evi;
 	struct iw_event iwe;
-	int ret, i = 0;
+	int ret, i = 0,j;
 	uint ch;
-	//int channel[14] = { 0 }; //1 for occupied, 0 for free.
+	//char * buf = NULL;
 
 	struct channel_info ch_info[14];
 	init_channelinfo(ch_info);
@@ -259,6 +262,7 @@ int main(int argc, char **argv)
 		return ERR_USAGE;
 	}
 
+	path = (const char *) argv[0];
 	wlan = (const char *) argv[1];
 
 	/* open socket */
@@ -303,19 +307,37 @@ int main(int argc, char **argv)
 	}
 	event_iter_term(&evi);
 
-	c = seek_Channel(ch_info); // return a channel index.
-	//set_channel(sock,c,wlan);
+	if (0) // no longer used
+	{
+		c = seek_Channel(ch_info); // return a channel index.
+	}
+
+	c = seek_Channel2(ch_info); // return a channel index.
+
+#ifdef MYDEBUG //display snr value in each channel
+	printf("Channel     :0\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\n");
+	printf("snr[14]= ");
+	for (j = 0; j <= MAX_CH; j++)
+	{
+		printf("%d\t", ch_info[j].snr);
+	}
+	printf("\n");
+#endif
 
 	if (c == 0)
 	{
-		//search channel by rssi
-		//seek_Channel_rssi();
+		//search a channel by SNR
+		;
+	}
+	else if (c >= 11) //avoid channel 12 and 13.
+	{
+		c = 11;
 	}
 	/*set hostapd config file*/
-	if (c != 0)
+	if (0 < c && c <= MAX_CH)
 	{
 		printf("\n Change channel to %d\n", c);
-		modify_hostapd_conf(c);
+		modify_hostapd_conf(c, path);
 	}
 
 	/* close socket */
