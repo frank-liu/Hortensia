@@ -39,6 +39,7 @@ inline void iw_print_gen_ie(unsigned char *buffer, int buflen);
 /*My function frank*/
 void init_channelinfo(struct channel_info ch_info[]);
 int seek_Channel(struct channel_info channel[]);
+void channel_process(struct channel_info channel[]);
 int seek_Channel2(struct channel_info channel[]);
 int set_channel(int sockfd, int ch_index, const char * iface);
 void modify_hostapd_conf(int index,const char *path);

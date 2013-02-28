@@ -248,7 +248,7 @@ int main(int argc, char **argv)
 	struct iwreq req;
 	struct event_iter evi;
 	struct iw_event iwe;
-	int ret, i = 0,j;
+	int ret, i = 0, j;
 	uint ch;
 	//char * buf = NULL;
 
@@ -326,8 +326,11 @@ int main(int argc, char **argv)
 
 	if (c == 0)
 	{
-		//search a channel by SNR
-		;
+#ifdef MYDEBUG //search a channel by SNR
+		printf("search a channel by SNR\n");
+#endif
+		channel_process(ch_info);
+		c = seek_Channel2(ch_info); //search a channel by SNR
 	}
 	else if (c >= 11) //avoid channel 12 and 13.
 	{

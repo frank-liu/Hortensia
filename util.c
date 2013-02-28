@@ -51,21 +51,21 @@ void init_channelinfo(struct channel_info ch_info[])
  * modify file contents using a shell script.
  * -index is channel index between [1,13].
  */
-void modify_hostapd_conf(int index,const char * path)
+void modify_hostapd_conf(int index, const char * path)
 {
 	FILE * fp;
 	char buffer[80];
-	char cmd_sh[100]="sh\t", conf_name[19]="myconfig_channel\t",ch[3];
+	char cmd_sh[100] = "sh\t", conf_name[19] = "myconfig_channel\t", ch[3];
 
 	char resolved_path[100];
 	sprintf(resolved_path, "%s", path);
-	resolved_path[strlen(resolved_path) - 6] = '\0';//delete last 6 words(i.e., switCH) in path
+	resolved_path[strlen(resolved_path) - 6] = '\0'; //delete last 6 words(i.e., switCH) in path
 	//printf("\nresolved_path=%s,len=%d\n", resolved_path,strlen(resolved_path));
 
-	strcat(cmd_sh,resolved_path);//combine path in shell cmd.
+	strcat(cmd_sh, resolved_path); //combine path in shell cmd.
 	//printf("%s\n",cmd_sh);//combine path in shell cmd.
 
-	strcat(cmd_sh,conf_name);//combine configure file name into shell cmd.
+	strcat(cmd_sh, conf_name); //combine configure file name into shell cmd.
 	//printf("2)%s\n",cmd_sh);//combine configure file name into shell cmd.
 
 	sprintf(ch, "%d", index); //convert int to char.
@@ -211,6 +211,32 @@ int seek_Channel2(struct channel_info channel[])
 			break; //found a free channel so jump out.
 	} while (--step);
 	return index; // if index==0, not find a free channel
+}
+/*
+ * Refine the channel info, ignore the channels whose SNR values are below average level.
+ */
+void channel_process(struct channel_info channel[])
+{
+	int i,j, sum = 0;
+	for (i = 0; i <= MAX_CH; i++)
+	{
+		sum += channel[i].snr;
+	}
+	sum /= MAX_CH;
+	for (i = 0; i <= MAX_CH; i++)
+	{
+		if(channel[i].snr<=sum)
+		{
+			channel[i].used=0;// presume this channel is not used, tho it's not.
+		}
+		j=MAX_CH-i;
+		if(j<i)
+			break;
+		else if(channel[j].snr<=sum)
+		{
+			channel[j].used=0;// presume this channel is not used, tho it's not.
+		}
+	}
 }
 /*
  * My function : Set Channel
