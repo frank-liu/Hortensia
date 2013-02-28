@@ -71,14 +71,14 @@ void modify_hostapd_conf(int index)
 /*
  * are all of channels free in radius step?
  */
-int all_free_ch(int i, int step, int channel[])
+int all_free_ch(int i, int step, struct channel_info channel[])
 {
 	int a, b, j;
 	a = (i - step) <= 0 ? 1 : (i - step);
 	b = (i + step) > MAX_CH ? MAX_CH : (i + step);
 	for (j = a; j <= b; j++)
 	{
-		if (channel[j] == 1)
+		if (channel[j].used == 1)
 			break;
 		if (j == b) //no used channel till channel[b], i.e.: all channels around i are free
 			return i;
@@ -88,7 +88,7 @@ int all_free_ch(int i, int step, int channel[])
 /*
  * is there a free channel at least? return the index.
  */
-int any_free_ch(int a, int b, int step, int channel[])
+int any_free_ch(int a, int b, int step, struct channel_info channel[])
 {
 	int i;
 	if (a >= b)
@@ -99,7 +99,7 @@ int any_free_ch(int a, int b, int step, int channel[])
 		a = 13;
 	for (i = a; i <= b; i++)
 	{
-		if (channel[i] == 0)
+		if (channel[i].used == 0)
 		{
 			if (all_free_ch(i, step, channel) > 0)
 			{
@@ -115,14 +115,14 @@ int any_free_ch(int a, int b, int step, int channel[])
  * seek the best channel: no interference with other channels
  * 0 for failure,
  */
-int seek_idealch(int channel[])
+int seek_idealch(struct channel_info channel[])
 {
 	int ch, i, step = 5;
 	do
 	{
 		for (i = 1; i <= MAX_CH; i++)
 		{
-			if (channel[i] == 0)
+			if (channel[i].used == 0)
 			{
 				if ((ch = any_free_ch(1, i - step, step, channel)) != 0)
 				{
@@ -151,12 +151,12 @@ int seek_idealch(int channel[])
 /*
  * My function just seeking a valid channel.
  */
-int seek_Channel(int channel[])
+int seek_Channel(struct channel_info channel[])
 {
 	int i, index = 0; //default not found.
 	for (i = 1; i < 14; i++)
 	{
-		if (channel[i] == 0)
+		if (channel[i].used == 0)
 		{
 			printf("find a free channel:  %d\n", i);
 			index = i;

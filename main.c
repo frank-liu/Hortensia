@@ -24,7 +24,7 @@
 #define ERR_SCAN	0x03
 #define ERR_READ	0x04
 
-void wifi_show(struct iw_event *iwe, int channel[])
+void wifi_show(struct iw_event *iwe, struct channel_info channel[])
 {
 	char tmp[TMP_LENGTH];
 	memset(tmp, 0, TMP_LENGTH);
@@ -58,7 +58,7 @@ void wifi_show(struct iw_event *iwe, int channel[])
 		{
 			double2string(freq, tmp);
 			printf("Frequency: %sHz\n", tmp);
-			channel[channel_index] = 1;
+			channel[channel_index].used = 1; // 1 means this channel is occupied.
 		}
 
 		/*Print out channel usage.*/
@@ -67,7 +67,7 @@ void wifi_show(struct iw_event *iwe, int channel[])
 		printf("Channel[14]= ");
 		for (f = 0; f <= 13; f++)
 		{
-			printf("%d\t", channel[f]);
+			printf("%d\t", channel[f].used);
 		}
 		printf("\n");
 #endif
@@ -247,8 +247,7 @@ int main(int argc, char **argv)
 	struct iw_event iwe;
 	int ret, i = 0;
 	uint ch;
-	int channel[14] =
-	{ 0 }; //1 for occupied, 0 for free.
+	//int channel[14] = { 0 }; //1 for occupied, 0 for free.
 
 	struct channel_info ch_info[14];
 	init_channelinfo(ch_info);
@@ -285,7 +284,7 @@ int main(int argc, char **argv)
 			printf("\n[%d]\n", ++i);
 #endif
 			/* argument should be struct array: ch_info*/
-			wifi_show(&iwe, channel);
+			wifi_show(&iwe, ch_info);
 
 			/*判断在这里写*/
 			if (&iwe.u.freq)
@@ -304,7 +303,7 @@ int main(int argc, char **argv)
 	}
 	event_iter_term(&evi);
 
-	c = seek_Channel(channel); // return a channel index.
+	c = seek_Channel(ch_info); // return a channel index.
 	//set_channel(sock,c,wlan);
 
 	if (c == 0)

@@ -38,10 +38,10 @@ inline void iw_print_gen_ie(unsigned char *buffer, int buflen);
 
 /*My function frank*/
 void init_channelinfo(struct channel_info ch_info[]);
-int seek_Channel(int channel[]);
+int seek_Channel(struct channel_info channel[]);
 int set_channel(int sockfd, int ch_index, const char * iface);
 void modify_hostapd_conf(int index);
-int all_free_ch(int i, int step, int channel[]);
-int any_free_ch(int a, int b, int step, int channel[]);
-int seek_idealch(int channel[]);
+int all_free_ch(int i, int step, struct channel_info channel[]);
+int any_free_ch(int a, int b, int step, struct channel_info channel[]);
+int seek_idealch(struct channel_info channel[]);
 #endif
