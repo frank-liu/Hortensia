@@ -46,5 +46,5 @@ void modify_hostapd_conf(int index,const char *path);
 int all_free_ch(int i, int step, struct channel_info channel[]);
 int any_free_ch(int a, int b, int step, struct channel_info channel[]);
 int seek_idealch(struct channel_info channel[]);
-int check_nic(void); // check numbers of up NIC
+//int check_nic(void); // check numbers of up NIC
 #endif
