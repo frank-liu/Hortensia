@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <linux/wireless.h>
-//#include <unistd.h> // for get current working directory
+#include <unistd.h> // for 'close' function
 
 #include "util.h"
 
@@ -217,26 +217,87 @@ int seek_Channel2(struct channel_info channel[])
  */
 void channel_process(struct channel_info channel[])
 {
-	int i,j, sum = 0;
+	int i, j, sum = 0;
 	for (i = 0; i <= MAX_CH; i++)
 	{
 		sum += channel[i].snr;
 	}
-	sum /= MAX_CH;
+	sum /= MAX_CH; //average SNR for 13 channels
+
 	for (i = 0; i <= MAX_CH; i++)
 	{
-		if(channel[i].snr<=sum)
+		if (channel[i].snr <= sum)
 		{
-			channel[i].used=0;// presume this channel is not used, tho it's not.
+			channel[i].used = 0; // presume this channel is not used, tho it's not.
 		}
-		j=MAX_CH-i;
-		if(j<i)
-			break;
-		else if(channel[j].snr<=sum)
+		else if (channel[i].used != 1) // For assurance, we assign 1 to it. Actually, it's already 1.
 		{
-			channel[j].used=0;// presume this channel is not used, tho it's not.
+			channel[i].used = 1; //
+		}
+
+		j = MAX_CH - i; //search on the other end (rear)
+		if (j < i)
+			break;
+		else if (channel[j].snr <= sum)
+		{
+			channel[j].used = 0; // presume this channel is not used, tho it's not.
+		}
+		else if (channel[j].used != 1) // For assurance, we assign 1 to it. Actually, it's already 1.
+		{
+			channel[j].used = 1; //
 		}
 	}
+}
+/*
+ * Check the numbers of NIC
+ */
+int check_nic(void)
+{
+	int fd, intrface, up_cnt = 0; // file descriptor, interface numbers, up interface numbers.
+	struct ifreq buf[16];
+	char *lo = "lo";
+	struct ifconf ifc;
+
+	/* open socket */
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+	if (fd >= 0)
+	{
+		ifc.ifc_len = sizeof buf;
+		ifc.ifc_buf = (caddr_t) buf;
+		if (!ioctl(fd, SIOCGIFCONF, (char *) &ifc))
+		{
+			intrface = ifc.ifc_len / sizeof(struct ifreq);
+			printf("interface num is intrface=%d\n\n\n", intrface);
+			while (intrface-- > 0)
+			{
+				//printf("net device %s\n", buf[intrface].ifr_name);
+				if (0 == strcmp(buf[intrface].ifr_name, lo))
+				{
+					continue;
+				}
+				//buf[intrface].ifr_ifru.ifru_settings.type
+				/*Jugde whether the net card status is up       */
+				if (buf[intrface].ifr_flags & IFF_UP)
+				{
+					up_cnt++; // up wireless NIC numbers
+				}
+				else
+				{
+					printf("interface %s is DOWN!",
+							buf[intrface].ifr_ifrn.ifrn_name);
+				}
+			}
+		}
+		else
+			perror("ioctl error.\n");
+	}
+	else
+		perror("Socket error.\n");
+
+	/* close socket */
+	close(fd);
+	return up_cnt; //number of NIC
 }
 /*
  * My function : Set Channel

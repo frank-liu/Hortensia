@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <linux/wireless.h>
-#include <unistd.h> // for get current work directory
+//#include <unistd.h> // for get current work directory
 #include "util.h"
 #include "event.h"
 
@@ -23,6 +23,7 @@
 #define ERR_SOCKET	0x02
 #define ERR_SCAN	0x03
 #define ERR_READ	0x04
+#define ERR_NIC		0x05
 
 void wifi_show(struct iw_event *iwe, struct channel_info channel[])
 {
@@ -252,10 +253,15 @@ int main(int argc, char **argv)
 	uint ch;
 	//char * buf = NULL;
 
-	struct channel_info ch_info[14];
+	struct channel_info ch_info[MAX_CH + 1];//element ch_info[0] will never be used.
 	init_channelinfo(ch_info);
 
 	/* check param */
+	if (check_nic() < 2) // if wirless NIC # is less than 2, exit.
+	{
+		printf("Available Wireless interfaces inadequate.(minimum 2)\n");
+		return ERR_NIC;
+	}
 	if (argc < 2)
 	{
 		usage(basename(argv[0]));
