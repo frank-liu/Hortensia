@@ -13,6 +13,7 @@
 //#include <unistd.h> // for get current work directory
 #include "util.h"
 #include "event.h"
+#include "interface.h"
 
 #define MAX_LENGTH  10240
 #define TMP_LENGTH	256
@@ -242,30 +243,6 @@ int wifi_read(int fd, const char *wlan, struct iwreq *req)
 	return 0;
 }
 
-/*
- * Check if the numbers of NIC > 2
- */
-int check_nic(const char * path)
-{
-	FILE * fp;
-	char cnt[5];
-	char cmd_sh[100] = "sh\t", conf_name[19] = "wireless_nic\t";
-	char resolved_path[100];
-
-	sprintf(resolved_path, "%s", path);
-	resolved_path[strlen(resolved_path) - 6] = '\0'; //delete last 6 words(i.e., switCH) in path
-
-	strcat(cmd_sh, resolved_path); //combine path in shell cmd.
-	strcat(cmd_sh, conf_name); //combine configure file name into shell cmd.
-
-	fp = popen(cmd_sh, "r"); //call a shell script: wireless_nic
-	fgets(cnt, sizeof(cnt), fp);
-	pclose(fp);
-
-	/*File header in /proc/net/wireless ocuppies 2 lines,
-	 *so here we subtract 2 to get the correct numbers of wireless NIC*/
-	return (atoi(cnt)-2);
-}
 
 int main(int argc, char **argv)
 {
@@ -296,10 +273,17 @@ int main(int argc, char **argv)
 	if (sock < 0)
 		return ERR_USAGE;
 
+	/*check if nic exist and is up*/
+	if (check_nic_name(wlan) != 1)
+	{
+		return ERR_NIC;
+	}
+
 	/* check NIC numbers */
 	if (check_nic(path) < 2) // if wirless NIC # is less than 2, exit.
 	{
-		printf("\nOops...! Available Wireless interfaces inadequate.(minimum 2)\n\n");
+		printf(
+				"\nOops...! Available Wireless interfaces inadequate.(minimum 2)\n\n");
 		//printf("There is only %s Wireless interfaces .\n");
 		return ERR_NIC;
 	}

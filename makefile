@@ -4,7 +4,7 @@ LIB += ./
 CFLAGS += -Wall -c -g -DDEBUG
 LFLAGS += -Wall -Bdynamic
 
-OBJS = main.o util.o event.o 
+OBJS = main.o util.o event.o interface.o
 
 switCH: $(OBJS)
 	gcc $(LFLAGS) -L$(LIB) -lm -o $(@) $(OBJS)
