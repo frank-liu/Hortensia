@@ -93,9 +93,11 @@ int check_nic(const char * path)
 	pclose(fp);
 
 	/*File header in /proc/net/wireless ocuppies 2 lines,
-	 *so here we subtract 2 to get the correct numbers of wireless NIC*/
+	 *so here we subtract 2 to get the correct numbers of wireless NIC
+	 */
 	return (atoi(cnt) - 2);
 }
+
 
 /*
  * check if nic name is correct and it's up
