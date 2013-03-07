@@ -1,6 +1,8 @@
 #!/bin/sh
 #echo "first:$1"
 # write $1 into config file
+/etc/init.d/hostapd stop
+#vi
 sed -ri 's/(channel=).*/\1'$1'/' /etc/hostapd/hostapd.wlan1.conf
 /etc/init.d/hostapd restart
 

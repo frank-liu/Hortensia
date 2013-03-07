@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 	}
 
 	/* check NIC numbers */
-	if (check_nic(path) < 2) // if wirless NIC # is less than 2, exit.
+	if (check_nic(path) < 1) // if wirless NIC # is less than 1, exit.
 	{
 		printf(
 				"\nOops...! Available Wireless interfaces inadequate.(minimum 2)\n\n");
