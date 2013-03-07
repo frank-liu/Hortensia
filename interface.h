@@ -27,4 +27,9 @@ int check_nic(const char * path);
  */
 int check_nic_name(const char * nic);
 
+/*
+ * turn down and set managed mode to the interface that we specified in ' sudo ./switCH   interface '
+ */
+void set_nic_mode(const char *wlan);
+
 #endif /* INTERFACE_H_ */

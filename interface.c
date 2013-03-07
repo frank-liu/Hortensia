@@ -35,7 +35,7 @@ int check_nic_up(const char * nic)
 		if (!ioctl(fd, SIOCGIFCONF, (char *) &ifc))
 		{
 			inf_cnt = ifc.ifc_len / sizeof(struct ifreq);
-			printf("interface num is inf_cnt=%d\n", inf_cnt);
+			//printf("interface num is inf_cnt=%d\n", inf_cnt);
 			while (inf_cnt-- > 0)
 			{
 				/*Go to next loop if it's not the nic we expect*/
@@ -50,30 +50,30 @@ int check_nic_up(const char * nic)
 					/*Jugde whether the net card status is up       */
 					if (buf[inf_cnt].ifr_flags & IFF_UP)
 					{
-						printf("Interface %s is UP.\n",buf[inf_cnt].ifr_name);
+						printf("Interface %s is UP.\n", buf[inf_cnt].ifr_name);
 						rtn = 1;
 					}
 					else
 					{
-						printf("Interface %s is DOWN. It needs to be set up.\n",nic);
+						printf("Interface %s is DOWN. It needs to be set up.\n",
+								nic);
 					}
 				}
 
 			}
 		}
 		else
-			perror("cpm: ioctl err\n");
+			perror("check_nic_up: ioctl err\n");
 	}
 	else
-		perror("cpm: socket err\n");
+		perror("check_nic_up: socket err\n");
 
 	close(fd);
 	return rtn;
 }
 
-
 /*
- * Check if the numbers of NIC > 2
+ * Check if the numbers of wireless NIC > 2
  */
 int check_nic(const char * path)
 {
@@ -127,13 +127,13 @@ int check_nic_name(const char * nic)
 		cnt++;
 		ifn = strtok(line, delim); //interface name with blank-space at head.
 		ifn = strtok(ifn, " "); // remove blank-space
-		printf("wifi interface:%s\n", ifn);
+		//printf("wifi interface:%s\n", ifn);
 
 		/*Check if nic matches in /proc/net/wireless, and the nic is up.*/
 		if (strcmp(ifn, nic) == 0 && check_nic_up(nic) == 1)
 		{
 			found = 1; // Yes, we found it.
-			printf("Correct interface name: %s\n", ifn); // print interface name
+			printf("Correct wireless interface name: %s\n", ifn); // print interface name
 			break;
 		}
 	}
@@ -142,4 +142,39 @@ int check_nic_name(const char * nic)
 		free(line);
 
 	return found;
+}
+
+/*
+ * turn down and set managed mode to the interface that we specified in ' sudo ./switCH   interface '
+ */
+void set_nic_mode(const char *wlan)
+{
+	FILE * fp;
+	char buffer[80];
+	char cmd_sh[30]; //shell cmd
+	/*ifconfig wlanX down*/
+	strcpy(cmd_sh,"ifconfig\t");
+	strcat(cmd_sh, wlan); //combine interface name into shell cmd.
+	strcat(cmd_sh, "\tdown"); //i.e.: ifconfig wlanX down
+	fp = popen(cmd_sh, "r"); //call a shell script
+	printf("%s\n",cmd_sh);
+	fgets(buffer, sizeof(buffer), fp);
+
+	/*iwconfig wlanX mode managed*/
+	strcpy(cmd_sh,"iwconfig\t");
+	strcat(cmd_sh, wlan);
+	strcat(cmd_sh, "\tmode managed"); //i.e.: ifconfig wlanX mode managed
+	fp = popen(cmd_sh, "r"); //call a shell script
+	printf("%s\n",cmd_sh);
+	fgets(buffer, sizeof(buffer), fp);
+
+	/*ifconfig wlanX up*/
+	strcpy(cmd_sh,"ifconfig\t");
+	strcat(cmd_sh, wlan); //combine interface name into shell cmd.
+	strcat(cmd_sh, "\tup"); //i.e.: ifconfig wlanX down
+	fp = popen(cmd_sh, "r"); //call a shell script
+	printf("%s\n",cmd_sh);
+	fgets(buffer, sizeof(buffer), fp);
+
+	pclose(fp);
 }

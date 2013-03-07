@@ -288,6 +288,9 @@ int main(int argc, char **argv)
 		return ERR_NIC;
 	}
 
+	/* set managed mode to wlan in order to enable it to scan */
+	set_nic_mode(wlan);
+
 	/* scan (enable scan)*/
 	if (wifi_scan(sock, wlan, &req) == 0)
 		return ERR_SCAN;
