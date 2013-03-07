@@ -21,7 +21,7 @@ inline void usage(char *name)
 {
 	printf("usage: %s <interface>\n", name);
 	printf("\te.g.: sudo ./%s wlan0\n", name);
-	printf("\tFrank LIU, <frank dot kingdom at gmail dot com>\n");
+	printf("\tFrank LIU, Feb 2013.\n\t< info@swanmesh.com >\n");
 }
 
 /*
