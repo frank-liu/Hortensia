@@ -243,7 +243,6 @@ int wifi_read(int fd, const char *wlan, struct iwreq *req)
 	return 0;
 }
 
-
 int main(int argc, char **argv)
 {
 	int sock = 0, c;
@@ -276,6 +275,9 @@ int main(int argc, char **argv)
 	/*check if nic exist and is up*/
 	if (check_nic_name(wlan) != 1)
 	{
+		printf(
+				"\nOops...! %s doesn't exist or was set down.\nPlease check the name and set it up.\n\n",
+				wlan);
 		return ERR_NIC;
 	}
 
