@@ -1,1 +1,0 @@
-sudo cat /proc/net/wireless | grep -c ""
